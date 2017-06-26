@@ -1,6 +1,7 @@
 if (!Detector.webgl) Detector.addGetWebGLMessage();
 var groupA = new THREE.Group();
 var groupB = new THREE.Group();
+var groupC = new THREE.Group();
 var container;
 // var stats = new Stats();
 var gui = new dat.GUI();
@@ -15,6 +16,7 @@ var ssaoPass;
 var depthScale = 1.0;
 var hyperMeshA;
 var hyperMeshB;
+var hyperMeshC;
 var postprocessing = {
   enabled: true,
   renderMode: 0
@@ -61,8 +63,21 @@ function init() {
       // wireframeLinewidth: 5,
       // aoMapIntensity: 10,
   });
+  hyperMaterialC = new THREE.MeshBasicMaterial({
+    // map: null,
+    color: 0x0ff055,
+    // metalness: 0.5,
+    // roughness: 10,
+    opacity: 0.5,
+    transparent: true,
+    shading: THREE.SmoothShading,
+    premultipliedAlpha: false
+      // wireframe: true,
+      // wireframeLinewidth: 5,
+      // aoMapIntensity: 10,
+  });
   var loader = new THREE.OBJLoader(manager);
-  loader.load('objects/micro/3.obj', function(object) {
+  loader.load('objects/micro/1.obj', function(object) {
     object.traverse(function(child) {
       if (child instanceof THREE.Mesh) {
         child.material = hyperMaterialA;
@@ -89,9 +104,24 @@ function init() {
         hyperMeshB.material.color.r = Math.random();
         hyperMeshB.material.color.g = Math.random();
         hyperMeshB.material.color.b = Math.random();
-        groupB.add(hyperMeshA);
+        groupB.add(hyperMeshB);
         groupB.add(child);
         scene.add(groupB);
+      }
+    });
+  });
+  loader.load('objects/micro/3.obj', function(object) {
+    object.traverse(function(child) {
+      if (child instanceof THREE.Mesh) {
+        child.material = hyperMaterialC;
+        hyperMeshC = child.clone();
+        // hyperMeshA.geometry.scale(0.2);        // hyperMeshA.material = new THREE.MeshBasicMaterial();
+        hyperMeshC.material.color.r = Math.random();
+        hyperMeshC.material.color.g = Math.random();
+        hyperMeshC.material.color.b = Math.random();
+        groupC.add(hyperMeshC);
+        groupC.add(child);
+        scene.add(groupC);
       }
     });
   });
@@ -170,10 +200,12 @@ function animate() {
 
 function render() {
   var timer = performance.now();
-  groupA.rotation.x = timer * 0.00001;
-  groupA.rotation.y = -timer * 0.00002;
+  groupA.rotation.x = timer * 0.000005;
+  groupA.rotation.y = -timer * 0.000025;
   groupB.rotation.x = -timer * 0.00002;
   groupB.rotation.y = timer * 0.00001;
+  groupC.rotation.z = -timer * 0.000005;
+  groupC.rotation.y = -timer * 0.000015;
   if (postprocessing.enabled) {
     // Render depth into depthRenderTarget
     scene.overrideMaterial = depthMaterial;
